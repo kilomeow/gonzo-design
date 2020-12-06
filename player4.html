@@ -1,0 +1,72 @@
+<!doctype html>
+
+<html>
+<head>
+  <meta charset="utf-8">
+
+  <title>Плеер 4</title>
+  <link rel="stylesheet" href="styles.css">
+
+</head>
+
+<body onload="init()">
+  <div class="audio-player">
+    <div class="container">
+    <svg
+      width="60px"
+      height="60px"
+      class="progress ring">
+      <circle
+        stroke="#00D26D"
+        stroke-width="3"
+        fill="transparent"
+        r="28.5"
+        cx="30"
+        cy="30"/>
+    </svg>
+      <div class="base ring">
+      </div>
+      <div class="ring shadow">
+      </div>
+      <div id="play-btn" onclick="togglePlay()"></div>
+    </div>
+    <div class="audio-wrapper" id="player-container" href="javascript:;">
+      <audio id="player" ontimeupdate="updateProgress()">
+        <source src="http://handsoff-engine.surge.sh/assets/music/the_legendary_theme.ogg" type="audio/mp3">
+	  </audio>
+    </div>
+  </div>
+  
+  <script>
+    var circumference = 100;
+    
+    function init() {
+        const circle = document.querySelector('.progress.ring circle');
+        const radius = circle.r.baseVal.value;
+        circumference = radius * 2 * Math.PI;
+    }
+  
+  function togglePlay() {
+      player = document.getElementById("player");
+      button = document.querySelector('.audio-player #play-btn');
+      if (button.classList.contains('pause')) {
+          button.classList.remove('pause');
+          player.pause();
+      } else {
+          button.classList.add('pause')
+          player.play();
+      }
+      document.querySelector('.audio-player .ring.base').classList.add("faded");
+  }
+
+  function updateProgress() {
+      player = document.getElementById("player");
+      progressRatio = player.currentTime / player.duration;
+      progress = progressRatio * circumference;
+      document.documentElement.style.setProperty('--progress-offset', progress);
+      
+  }
+  </script>
+
+</body>
+</html>

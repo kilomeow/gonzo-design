@@ -1,0 +1,63 @@
+body {
+  /* wew */   
+}
+
+:root {
+    --progress-offset: 0;
+}
+
+.audio-player .container {
+    position: relative;
+    margin: 2em;
+    width: 60px;
+    height: 60px;
+}
+
+.audio-player .ring {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+}
+
+.audio-player .ring.base {
+    border-radius: 50%;
+    transition: box-shadow 250ms ease-out;
+    box-shadow: 0 0 0 3px rgba(53, 53, 53, 1) inset;
+    z-index: 1;
+}
+
+.audio-player .ring.shadow {
+    border-radius: 50%;
+    box-shadow: 0 0 2px 0 rgba(53, 53, 53, 0.7) inset;
+}
+
+.audio-player .ring.base.faded {
+    box-shadow: 0 0 0 3px rgba(53, 53, 53, 0.3) inset;
+}
+
+.audio-player .progress.ring {
+    z-index: 5;
+}
+
+.audio-player .progress.ring circle {
+    stroke-dasharray: var(--progress-offset) 1000;
+    transform: rotate(-90deg);
+    transform-origin: 50% 50%;
+    transition: stroke-dasharray 100ms linear; 
+}
+
+.audio-player #play-btn {
+  z-index: 10;
+  background-image: url("https://chatconverter.ru/audio/play-button-1.png");
+  background-size: cover;
+  width: 30px;
+  height: 30px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+   margin: -15px 0 0 -15px;
+}
+
+.audio-player #play-btn.pause {
+    background-image: url("https://chatconverter.ru/audio/pause-button-1.png");
+}
