@@ -9,14 +9,14 @@ body {
 .audio-player .container {
     position: relative;
     margin: 2em;
-    width: 60px;
-    height: 60px;
+    width: 72px;
+    height: 72px;
 }
 
 .audio-player .ring {
     position: absolute;
-    width: 60px;
-    height: 60px;
+    width: 72px;
+    height: 72px;
 }
 
 .audio-player .ring.base {
