@@ -1,0 +1,413 @@
+<!-- CSS (внутри тегов style) -->
+
+<style>
+.audio-player {
+  font-family: sans-serif;
+  font-weight: 200;
+}
+
+:root {
+    --progress-offset: 0;
+}
+
+.audio-player .ring-container {
+    position: relative;
+    margin: 2em;
+    width: 72px;
+    height: 72px;
+}
+
+.audio-player .ring {
+    position: absolute;
+    width: 72px;
+    height: 72px;
+}
+
+.audio-player .ring.base {
+    border-radius: 50%;
+    transition: box-shadow 250ms ease-out;
+    box-shadow: 0 0 0 3px rgba(53, 53, 53, 1) inset;
+    z-index: 1;
+}
+
+.audio-player .ring.shadow {
+    border-radius: 50%;
+    box-shadow: 0 0 2px 0 rgba(53, 53, 53, 0.7) inset;
+}
+
+.audio-player .ring.base.faded {
+    box-shadow: 0 0 0 3px rgba(53, 53, 53, 0.3) inset;
+}
+
+.audio-player .progress.ring {
+    z-index: 5;
+}
+
+.audio-player .progress.ring circle {
+    stroke-dasharray: var(--progress-offset) 1000;
+    transform: rotate(-90deg);
+    transform-origin: 50% 50%;
+    transition: stroke-dasharray 100ms linear; 
+}
+
+.audio-player.player4 #play-btn {
+  z-index: 10;
+  background-image: url("https://chatconverter.ru/audio/play-button-1.png");
+  background-size: cover;
+  width: 30px;
+  height: 30px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+   margin: -15px 0 0 -15px;
+}
+
+.audio-player.player4 #play-btn.pause {
+    background-image: url("https://chatconverter.ru/audio/pause-button-1.png");
+}
+
+.audio-player.player1 {
+    display: inline-block;
+    position: fixed;
+    z-index: 10;
+    right: 2em;
+    top: 1em;
+}
+
+
+.audio-player.player1 #play-btn {
+    width: 48px;
+    height: 48px;
+    background-image: url(https://gonzo-trip.ru/awakening/assets/on_sound.png);
+    background-size: cover;
+}
+
+.audio-player.player1 #play-btn.pause {
+    background-image: url(https://gonzo-trip.ru/awakening/assets/off_sound.png);
+}
+
+.player-list player-2 {
+    margin-right: 2em;
+}
+</style>
+
+
+
+
+<!-- Плеер 1 After <BODY> -->
+
+<div class="audio-player player1">
+  <div id="play-btn" onclick="toggleMute()"></div>
+</div>
+
+<script>
+var player = null;
+var currentSrc = null;
+var mute = false;
+var pageNum = null;
+  
+const tracklist =
+  { "4-12"  : "https://gonzo-trip.ru/awakening/seasons/1.%20gray.mp3"
+  , "13-33" : "https://gonzo-trip.ru/awakening/seasons/2.%20brown.mp3"
+  , "34-44" : "https://gonzo-trip.ru/awakening/seasons/3.%20green.mp3"
+  , "45-51" : "https://gonzo-trip.ru/awakening/seasons/4.%20orange.mp3"
+  , "52-64" : "https://gonzo-trip.ru/awakening/seasons/5.%20pink.mp3"
+  , "65-99" : "https://gonzo-trip.ru/awakening/seasons/1.%20gray.mp3"
+  }
+
+const dimlist = [12];
+  
+const players = {}
+
+function preloadPlayers() {
+  for (let diap in tracklist) {
+      const src = tracklist[diap];
+      const audio = new Audio(src);
+      audio.loop = true;
+      players[src] = audio;
+  }
+}
+  
+preloadPlayers();
+  
+function getCurrentMusicSource(pagenum) {
+  for (let diap in tracklist) {
+    let [a, b] = diap.split("-").map(num => parseInt(num))
+    if (a <= pagenum && pagenum <= b) {
+      return tracklist[diap];
+    }
+  }
+}
+
+function updatePlayer(pageNum) {
+  actualSrc = getCurrentMusicSource(pageNum);
+  if (actualSrc && (actualSrc !== currentSrc)) {
+    console.log("update audio", actualSrc);
+    currentSrc = actualSrc;
+    if (player) {player.pause();}
+    player = players[currentSrc];
+    if (!mute) {player.play();}
+  }
+  if (player) {if (dimlist.includes(pageNum)) {
+      player.volume = 0.2
+  } else {
+      player.volume = 1.0
+  }}
+}
+  
+function getCurrentPageNum() {
+  const split_url = window.location.href.split("/");
+  return parseInt(split_url[split_url.length-1] || split_url[split_url.length-2]);
+}
+
+document.onscroll = () => {
+  pn = getCurrentPageNum();
+  if (pn !== pageNum) {
+    pageNum = pn;
+    var pageUpdateEvent = new CustomEvent("update_pagenum", {detail: {pageNum: pn}});
+    document.dispatchEvent(pageUpdateEvent);
+  }
+};
+  
+document.addEventListener("update_pagenum", (e) => {updatePlayer(e.detail.pageNum)})
+  
+function toggleMute() {
+      button = document.querySelector('.audio-player #play-btn');
+      if (mute) {
+          button.classList.remove('pause');
+          if (player) {player.play();}
+          mute = false;
+      } else {
+          button.classList.add('pause')
+          if (player) {player.pause();}
+          mute = true;
+      }
+}
+
+function checkPlayer2() {
+  var playerList = null;
+  document.querySelectorAll("iframe").forEach((i) => {
+    var idocument = null;
+    try {
+      idocument = i.contentWindow.document;
+    } catch (e) {
+      // pass
+    }
+    if (idocument) {
+    	t = idocument.querySelector(".player-list");
+    	if (t) {playerList = t;}
+    }
+  })
+  return playerList;
+}
+  
+</script>
+
+
+
+
+<!-- Плеер 2 -->
+<!-- Clear Widget OFF -->
+<!-- Use iFrame ON>
+
+<!-- Widget Code: -->
+<template id="player-2-template">
+<style>
+  .audio-player.player2 {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center; 
+    height: 36px;
+}
+
+.audio-player.player2 #play-btn {
+    display: inline-block;
+    width: 36px;
+    height: 36px;
+    background-image: url(https://gonzo-trip.ru/awakening/assets/player2_play.png);
+    background-size: cover;
+}
+
+.audio-player.player2 .caption {
+    display: inline-block;
+    margin-left: 0.7em;
+}
+
+.caption {
+    color: #4d4d4d;
+}
+
+.caption .track_info {
+    display: inline-flex;
+}
+
+.track_info div {
+    margin-left: 0.5em;
+}
+
+.track_info div:first-child {
+    margin-left: 0;
+}
+
+.track_info .track_name {
+    color: black;
+    font-weight: 400;
+}
+
+.track_info .track_info_separator {
+    color: black;
+    font-weight: 400;
+}
+
+.caption .timeleft {
+    display: inline-block;
+    color: 
+}
+
+.audio-player.player2 #play-btn.pause {
+    background-image: url(https://gonzo-trip.ru/awakening/assets/player2_pause.png);
+}
+
+</style>
+<div class="audio-player player2">
+    <div id="play-btn"></div>
+    <div class="caption">
+      <div class="track_info">
+        <div class="track_name"><slot name="track_name">?</slot></div>
+        <div class="track_info_separator"><span>—</span></div>
+        <div class="track_author"><slot name="track_author">?</slot></div>
+      </div>
+    </div>
+    <div class="caption">
+      <div class="timeleft">
+        <p></p>
+      </div>
+    </div>
+    <div id="player-container">
+      <slot name="track_source"></slot>
+    </div>
+</div>
+</template>
+  
+<script>
+customElements.define('player-2',
+  class extends HTMLElement {
+    constructor() {
+      super();
+      
+      const template = document.getElementById('player-2-template').content;
+      
+      this.sr = this.attachShadow({mode: 'open'});
+      this.sr.appendChild(template.cloneNode(true))
+      this.counter = 5;
+    }
+
+    connectedCallback () {
+        let playerContainer = this.sr.querySelector("#player-container");
+        let containerSlot = this.sr.querySelector("#player-container slot")
+        let audioUrl = containerSlot.assignedNodes()[0].src;
+        let player = new Audio();
+        player.src = audioUrl;
+        playerContainer.appendChild(player);
+        let button = this.sr.querySelector('#play-btn');
+        
+        let play = () => {
+            button.classList.add('pause');
+            player.play();
+        }
+
+        let pause = () => {
+            button.classList.remove('pause');
+            player.pause();
+        }
+
+        let togglePlay = () => {
+            if (button.classList.contains('pause')) {
+                pause();
+            } else {
+                play();
+            }
+        }
+        
+        let updateProgress = () => {
+            let timeleft = player.duration - player.currentTime;
+            let tl_minutes = Math.floor(timeleft/60);
+            let tl_seconds = Math.floor(timeleft) % 60;
+            let tl_text = "" + tl_minutes + ":" + ((tl_seconds < 10) ? "0" : "") + tl_seconds;
+            let timeCaption = this.sr.querySelector(".timeleft p");
+            timeCaption.textContent = tl_text;
+        }
+
+        let rewind = () => {
+            pause();
+            player.currentTime = 0;
+            updateProgress();
+        }
+
+        button.onclick = togglePlay;
+        player.ontimeupdate = updateProgress;
+        player.oncanplaythrough = updateProgress;
+        player.onended = () => {
+            rewind();
+            this.dispatchEvent(new Event("audio_ended"));
+        }
+        player.onplay =  () => {this.dispatchEvent(new Event("audio_play"))};
+        player.onpause = () => {this.dispatchEvent(new Event("audio_pause"))};
+
+        this.addEventListener("play", play);
+        this.addEventListener("pause", pause);
+    }
+
+  }
+);
+
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll(".player-list").forEach((pl) => {
+    var prevPlayer = null;
+    pl.querySelectorAll("player-2").forEach((curPlayer) => {
+        // check if audio started to play stop others
+        curPlayer.addEventListener("audio_play", () => {
+            pl.querySelectorAll("player-2").forEach((p) => {
+                if (!curPlayer.isSameNode(p)) {p.dispatchEvent(new Event("pause"));}
+            })
+        })
+        
+        // autoplay next
+        if (prevPlayer) {
+            prevPlayer.addEventListener(
+                "audio_ended", 
+                () => {curPlayer.dispatchEvent(new Event("play"))})
+        }
+        prevPlayer = curPlayer;
+    })
+});
+})
+
+</script>
+
+<style>
+.player-list player-2 {
+    margin-right: 2em;
+}
+</style>
+
+<!-- Track List Part -->
+<div class="player-list">
+<player-2>
+  <span slot="track_name">Настя Молодило</span>
+  <span slot="track_author">Уважение к мужчине</span>
+  <source slot="track_source" src="https://gonzo-trip.ru/awakening/voices/12/1.mp3">
+</player-2>
+<player-2>
+  <span slot="track_name">Маша Панина</span>
+  <span slot="track_author">Принимать и отдавать</span>
+    <source slot="track_source" src="https://gonzo-trip.ru/awakening/voices/12/2.mp3">
+</player-2>
+</div>
+
+
+
+
+<!-- Плеер 3 -->
+
+<!-- TODO -->
