@@ -1,0 +1,34 @@
+<!doctype html>
+
+<html>
+<head>
+  <meta charset="utf-8">
+
+  <title>Плеер 1</title>
+  <link rel="stylesheet" href="styles.css">
+
+</head>
+
+<body>
+<div class="audio-player player1">
+  <div id="play-btn" onclick="togglePlay()"></div>
+  <audio id="player">
+        <source src="http://handsoff-engine.surge.sh/assets/music/the_legendary_theme.ogg" type="audio/mp3">
+  </audio>
+</div>
+</body>
+
+<script>
+function togglePlay() {
+      player = document.getElementById("player");
+      button = document.querySelector('.audio-player #play-btn');
+      if (button.classList.contains('pause')) {
+          button.classList.remove('pause');
+          player.pause();
+      } else {
+          button.classList.add('pause')
+          player.play();
+      }
+      document.querySelector('.audio-player .ring.base').classList.add("faded");
+}
+</script>

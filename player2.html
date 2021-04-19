@@ -1,0 +1,206 @@
+<!doctype html>
+
+<html>
+<head>
+  <meta charset="utf-8">
+
+  <title>Плеер 2</title>
+  <link rel="stylesheet" href="styles.css">
+
+</head>
+
+<body>
+<template id="player-2-template">
+<style>
+  .audio-player.player2 {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center; 
+    height: 36px;
+}
+
+.audio-player.player2 #play-btn {
+    display: inline-block;
+    width: 36px;
+    height: 36px;
+    background-image: url(assets/player2_play.png);
+    background-size: cover;
+}
+
+.audio-player.player2 .caption {
+    display: inline-block;
+    margin-left: 0.7em;
+}
+
+.caption {
+    color: #4d4d4d;
+}
+
+.caption .track_info {
+    display: inline-flex;
+}
+
+.track_info div {
+    margin-left: 0.5em;
+}
+
+.track_info div:first-child {
+    margin-left: 0;
+}
+
+.track_info .track_name {
+    color: black;
+    font-weight: 400;
+}
+
+.track_info .track_info_separator {
+    color: black;
+    font-weight: 400;
+}
+
+.caption .timeleft {
+    display: inline-block;
+    color: 
+}
+
+.audio-player.player2 #play-btn.pause {
+    background-image: url(assets/player2_pause.png);
+}
+
+</style>
+<div class="audio-player player2">
+    <div id="play-btn"></div>
+    <div class="caption">
+      <div class="track_info">
+        <div class="track_name"><slot name="track_name">?</slot></div>
+        <div class="track_info_separator"><span>—</span></div>
+        <div class="track_author"><slot name="track_author">?</slot></div>
+      </div>
+    </div>
+    <div class="caption">
+      <div class="timeleft">
+        <p></p>
+      </div>
+    </div>
+    <div id="player-container">
+      <slot name="track_source"></slot>
+    </div>
+</div>
+</template>
+  
+<script>
+customElements.define('player-2',
+  class extends HTMLElement {
+    constructor() {
+      super();
+      
+      const template = document.getElementById('player-2-template').content;
+      
+      this.sr = this.attachShadow({mode: 'open'});
+      this.sr.appendChild(template.cloneNode(true))
+      this.counter = 5;
+    }
+
+    connectedCallback () {
+        let playerContainer = this.sr.querySelector("#player-container");
+        let containerSlot = this.sr.querySelector("#player-container slot")
+        let audioUrl = containerSlot.assignedNodes()[0].src;
+        let player = new Audio();
+        player.src = audioUrl;
+        playerContainer.appendChild(player);
+        let button = this.sr.querySelector('#play-btn');
+        
+        let play = () => {
+            button.classList.add('pause');
+            player.play();
+        }
+
+        let pause = () => {
+            button.classList.remove('pause');
+            player.pause();
+        }
+
+        let togglePlay = () => {
+            if (button.classList.contains('pause')) {
+                pause();
+            } else {
+                play();
+            }
+        }
+        
+        let updateProgress = () => {
+            let timeleft = player.duration - player.currentTime;
+            let tl_minutes = Math.floor(timeleft/60);
+            let tl_seconds = Math.floor(timeleft) % 60;
+            let tl_text = "" + tl_minutes + ":" + ((tl_seconds < 10) ? "0" : "") + tl_seconds;
+            let timeCaption = this.sr.querySelector(".timeleft p");
+            timeCaption.textContent = tl_text;
+        }
+
+        let rewind = () => {
+            pause();
+            player.currentTime = 0;
+            updateProgress();
+        }
+
+        button.onclick = togglePlay;
+        player.ontimeupdate = updateProgress;
+        player.oncanplaythrough = updateProgress;
+        player.onended = () => {
+            rewind();
+            this.dispatchEvent(new Event("audio_ended"));
+        }
+        player.onplay =  () => {this.dispatchEvent(new Event("audio_play"))};
+        player.onpause = () => {this.dispatchEvent(new Event("audio_pause"))};
+
+        this.addEventListener("play", play);
+        this.addEventListener("pause", pause);
+    }
+
+  }
+);
+
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll(".player-list").forEach((pl) => {
+    var prevPlayer = null;
+    pl.querySelectorAll("player-2").forEach((curPlayer) => {
+        // check if audio started to play stop others
+        curPlayer.addEventListener("audio_play", () => {
+            pl.querySelectorAll("player-2").forEach((p) => {
+                if (!curPlayer.isSameNode(p)) {p.dispatchEvent(new Event("pause"));}
+            })
+        })
+        
+        // autoplay next
+        if (prevPlayer) {
+            prevPlayer.addEventListener(
+                "audio_ended", 
+                () => {curPlayer.dispatchEvent(new Event("play"))})
+        }
+        prevPlayer = curPlayer;
+    })
+});
+})
+
+</script>
+
+<div class="player-list">
+<player-2>
+  <span slot="track_name">Appetite</span>
+  <span slot="track_author">Goal Striving Device</span>
+  <source slot="track_source" src="music/Appetite_-_08_-_Goal_Striving_Device.mp3"></source>
+</player-2>
+<player-2>
+  <span slot="track_name">People Like Us</span>
+  <span slot="track_author">Doo Dah Tango</span>
+    <source slot="track_source" src="music/People_Like_Us_-_07_-_Doo_Dah_Tango.mp3"></source>
+</player-2>
+<player-2>
+  <span slot="track_name">Lezet</span>
+  <span slot="track_author">Prepared Piano Piece II</span>
+    <source slot="track_source" src="music/Lezet_-_02_-_Prepared_Piano_Piece_II.mp3"></source>
+</player-2>
+</div>
+
+</body>
+</html>

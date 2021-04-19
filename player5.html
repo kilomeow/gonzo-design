@@ -1,0 +1,100 @@
+<!doctype html>
+
+<html>
+<head>
+  <meta charset="utf-8">
+
+  <title>Плеер 4</title>
+
+</head>
+
+<style>
+  body {
+    background-color: black;
+  }
+
+  .audio-player .ring-container {
+    position: relative;
+    width: 48px;
+    height: 49px;
+}
+
+.audio-player .ring {
+    position: absolute;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    background-color: rgba(255, 255, 255, 1);
+}
+
+.audio-player .progress.ring circle {
+    stroke-dasharray: var(--progress-offset) 1000;
+    transform: rotate(-90deg);
+    transform-origin: 50% 50%;
+    transition: stroke-dasharray 100ms linear; 
+}
+
+.audio-player.player4 #play-btn {
+  z-index: 10;
+  background-image: url("https://chatconverter.ru/audio/play-button-1.png");
+  background-size: cover;
+  width: 30px;
+  height: 30px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+   margin: -15px 0 0 -15px;
+}
+
+.audio-player.player4 #play-btn.pause {
+    background-image: url("https://chatconverter.ru/audio/pause-button-1.png");
+}
+</style>
+
+<body onload="init()">
+  <div class="audio-player player4">
+    <div class="ring-container">
+      <div class="base ring">
+      </div>
+      <div id="play-btn" onclick="togglePlay()"></div>
+    </div>
+    <div class="audio-wrapper" id="player-container" href="javascript:;">
+      <audio id="player">
+        <source src="http://handsoff-engine.surge.sh/assets/music/the_legendary_theme.ogg" type="audio/mp3">
+	  </audio>
+    </div>
+  </div>
+  
+  <script>
+    var circumference = 100;
+    
+    function init() {
+        const circle = document.querySelector('.progress.ring circle');
+        const radius = circle.r.baseVal.value;
+        circumference = radius * 2 * Math.PI;
+    }
+  
+  function togglePlay() {
+      player = document.getElementById("player");
+      button = document.querySelector('.audio-player #play-btn');
+      if (button.classList.contains('pause')) {
+          button.classList.remove('pause');
+          player.pause();
+      } else {
+          button.classList.add('pause')
+          player.play();
+      }
+      document.querySelector('.audio-player .ring.base').classList.add("faded");
+  }
+
+  function updateProgress() {
+      player = document.getElementById("player");
+      progressRatio = player.currentTime / player.duration;
+      progress = progressRatio * circumference;
+      document.documentElement.style.setProperty('--progress-offset', progress);
+      
+  }
+  </script>
+
+</body>
+</html>
